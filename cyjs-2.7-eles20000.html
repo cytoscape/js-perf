@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Cytoscape.js 2.7 (20,000 elements)</title>
+
+    <style>
+      html, body { margin: 0; padding: 0; font: 12pt helvetica neue, helvetica, liberation sans, sans-serif; line-height: 1; }
+      h1 { position: absolute; left: 0; top: 0; pointer-events: none; font-weight: normal; font-size: 1em; margin: 0.5em; color: #888; }
+      #cy { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+    </style>
+
+    <script src="bluebird.min.js"></script>
+    <script src="fetch.js"></script>
+    <script src="cytoscape-2.7.0-beta1.min.js"></script>
+
+    <script>
+      var domReady = new Promise(function( resolve ){
+        window.addEventListener('DOMContentLoaded', function(){
+          resolve();
+        });
+      });
+
+      var getGraph = function(){
+        var file = './NB_selected_edges_2_20000.json';
+
+        return fetch( file ).then(function( response ){
+          return response.json();
+        }).then(function( json ){
+          return json.elements;
+        });
+      };
+
+      var initCy = function(){
+        return cytoscape({
+          container: document.getElementById('cy'),
+          elements: getGraph(),
+          layout: { name: 'preset' },
+          style: [
+            {
+              selector: 'node',
+              style: {
+                'label': 'data(label)',
+                'background-color': '#aaa'
+              }
+            },
+            {
+              selector: 'edge',
+              style: {
+                'opacity': 0.2,
+                'line-color': '#ccc',
+                'width': 3
+              }
+            }
+          ]
+        });
+      };
+
+      domReady.then( initCy ).then(function( cy ){
+        window.cy = cy; // put it in the window so you can play with the instance
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>Cytoscape.js 2.7 (20,000 elements)</h1>
+    <div id="cy"></div>
+  </body>
+
+</html>
