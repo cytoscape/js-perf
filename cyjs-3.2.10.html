@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Cytoscape.js 3.2.10</title>
+
+    <style>
+      html, body { margin: 0; padding: 0; font: 12pt helvetica neue, helvetica, liberation sans, sans-serif; line-height: 1; }
+      h1 { pointer-events: none; font-weight: normal; font-size: 1em; margin: 0.5em; color: #888; }
+      .header{background: white;position:relative; z-index: 5;}
+      select,span {position:relative; z-index: 10; margin: 0.5em; }
+      #cy { position: absolute; left: 0; right: 0; top: 53px; bottom: 0; }
+    </style>
+
+    <script src="bluebird.min.js"></script>
+    <script src="fetch.js"></script>
+    <script src="cytoscape-3.2.10.min.js"></script>
+
+    <script>
+      var domReady = new Promise(function( resolve ){
+        window.addEventListener('DOMContentLoaded', function(){
+          resolve();
+        });
+      });
+
+      var getGraph = function(){
+        var file = './1677336797128292_MOESM10_ESM_child_child.json';
+
+        return fetch( file ).then(function( response ){
+          return response.json();
+        }).then(function( json ){
+          return json.elements;
+        });
+      };
+
+      var initCy = function(){
+        return cytoscape({
+          container: document.getElementById('cy'),
+          elements: getGraph(),
+          layout: { name: 'preset' },
+          style: [
+            {
+              selector: 'node',
+              style: {
+                'label': 'data(label)',
+                'background-color': '#aaa'
+              }
+            },
+            {
+              selector: 'edge',
+              style: {
+                'opacity': 0.2,
+                'line-color': '#ccc',
+                'width': 3
+              }
+            }
+          ]
+        });
+      };
+
+      domReady.then( initCy ).then(function( cy ){
+        window.cy = cy; // put it in the window so you can play with the instance
+      });
+      function layoutChange() {
+          const layoutType = document.getElementById("layout").value;
+          const layout = cy.layout({
+            name: layoutType
+          });
+          const timeBefore = performance.now();
+          layout.run();
+          const timeTaken = performance.now()-timeBefore;
+          document.getElementById("info").innerHTML = "Time taken to apply layout: " + timeTaken +" ms";
+
+        }
+
+        function networkChange() {
+          const networkType = document.getElementById("network").value;
+          cy.remove(cy.elements());
+          return fetch( networkType ).then(function( response ){
+          return response.json();
+        }).then(function( json ){
+          const timeBefore = performance.now();
+           cy.add(json.elements);
+           const timeTaken = performance.now()-timeBefore;
+          document.getElementById("info").innerHTML = "Time taken (after removeal->displayed): " + timeTaken +" ms";
+        });
+          console.log(networkType);
+          console.log(cy);
+        }
+    </script>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1> Cytoscape.js 3.2.10</h1>
+      <span>Network</span>
+      <select id="network" onchange="networkChange()">
+        <option value="./1677336797128292_MOESM10_ESM_child_child.json">6,000</option>
+        <option value="./NB_selected_edges_2_10000.json">10,000</option>
+        <option value="./NB_selected_edges_2_20000.json">20,000</option>
+      </select>
+      <span>Layout</span>
+      <select id="layout" onchange="layoutChange()">
+        <option value="null">null</option>
+        <option value="random">random</option>
+        <option value="preset">preset</option>
+        <option value="grid">grid</option>
+        <option value="circle">circle</option>
+        <option value="concentric">concentric</option>
+        <option value="breadthfirst">breadthfirst</option>
+        <option value="cose">cose</option>
+      </select>
+      <span id="info">Change a setting to view preformance</span>
+    </div>
+    <div id="cy"></div>
+  </body>
+
+</html>
