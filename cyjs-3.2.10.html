@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<DOCTYPE html>
 <html>
 
   <head>
@@ -15,17 +15,33 @@
     <script src="bluebird.min.js"></script>
     <script src="fetch.js"></script>
     <script src="cytoscape-3.2.10.min.js"></script>
+		<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 
+    <script src="./arbor.js"></script>
+    <script src="https://unpkg.com/cytoscape-arbor/cytoscape-arbor.js"> </script>
+
+		<script src="https://unpkg.com/webcola/WebCola/cola.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-cola/cytoscape-cola.js"> </script>
+
+    <script src="https://unpkg.com/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js"> </script>
+
+    <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre/cytoscape-dagre.js"> </script>
+    
+    <script src="https://unpkg.com/cytoscape-euler/cytoscape-euler.js"> </script>
+
+    <script src="https://unpkg.com/klayjs@0.4.1/klay.js"></script>
+    <script src="https://unpkg.com/cytoscape-klay/cytoscape-klay.js"> </script>
+
+		<script src="https://unpkg.com/weaverjs@1.2.0/dist/weaver.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-spread/cytoscape-spread.js"></script>
+  
+    <script src="https://cdn.rawgit.com/dhotson/springy/2.7.1/springy.js"></script>
+    <script src="https://unpkg.com/cytoscape-springy/cytoscape-springy.js"></script>
+    
     <script>
-      var domReady = new Promise(function( resolve ){
-        window.addEventListener('DOMContentLoaded', function(){
-          resolve();
-        });
-      });
-
       var getGraph = function(){
         var file = './1677336797128292_MOESM10_ESM_child_child.json';
-
         return fetch( file ).then(function( response ){
           return response.json();
         }).then(function( json ){
@@ -33,44 +49,46 @@
         });
       };
 
-      var initCy = function(){
-        return cytoscape({
+      window.addEventListener('DOMContentLoaded', function(){
+        var cy = window.cy = cytoscape({
           container: document.getElementById('cy'),
+          layout: {
+            name: 'preset',
+          },
           elements: getGraph(),
-          layout: { name: 'preset' },
           style: [
             {
-              selector: 'node',
+              selector: "node",
               style: {
-                'label': 'data(label)',
-                'background-color': '#aaa'
+                "label": "data(label)",
+                "background-color": "#aaa"
               }
             },
             {
-              selector: 'edge',
+              selector: "edge",
               style: {
-                'opacity': 0.2,
-                'line-color': '#ccc',
-                'width': 3
+                "opacity": 0.2,
+                "line-color": "#ccc",
+                "width": 3
               }
             }
           ]
         });
-      };
-
-      domReady.then( initCy ).then(function( cy ){
-        window.cy = cy; // put it in the window so you can play with the instance
       });
+
       function layoutChange() {
           const layoutType = document.getElementById("layout").value;
-          const layout = cy.layout({
+          let layout = cy.layout({
             name: layoutType
           });
-          const timeBefore = performance.now();
+          let timeTaken,timeBefore;
+          document.getElementById("info").innerHTML = "Applying layout";
+          cy.on('layoutstop', () => {
+            timeTaken=performance.now()-timeBefore;
+            document.getElementById("info").innerHTML = "Time taken to apply layout: " + timeTaken +" ms";
+          });
+          timeBefore = performance.now();
           layout.run();
-          const timeTaken = performance.now()-timeBefore;
-          document.getElementById("info").innerHTML = "Time taken to apply layout: " + timeTaken +" ms";
-
         }
 
         function networkChange() {
@@ -79,13 +97,9 @@
           return fetch( networkType ).then(function( response ){
           return response.json();
         }).then(function( json ){
-          const timeBefore = performance.now();
            cy.add(json.elements);
-           const timeTaken = performance.now()-timeBefore;
-          document.getElementById("info").innerHTML = "Time taken (after removeal->displayed): " + timeTaken +" ms";
+           layoutChange();
         });
-          console.log(networkType);
-          console.log(cy);
         }
     </script>
   </head>
@@ -101,14 +115,22 @@
       </select>
       <span>Layout</span>
       <select id="layout" onchange="layoutChange()">
+        <option value="preset">preset</option>
         <option value="null">null</option>
         <option value="random">random</option>
-        <option value="preset">preset</option>
         <option value="grid">grid</option>
         <option value="circle">circle</option>
         <option value="concentric">concentric</option>
         <option value="breadthfirst">breadthfirst</option>
         <option value="cose">cose</option>
+        <option value="arbor">arbor</option>
+        <option value="cola">cola</option>
+        <option value="cose-bilkent">cose-bilkent</option>
+        <option value="dagre">dagre</option>
+        <option value="euler">euler</option>
+        <option value="klay">klay</option>
+        <option value="spread">spread</option>
+        <option value="springy">springy</option>
       </select>
       <span id="info">Change a setting to view preformance</span>
     </div>
