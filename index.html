@@ -7,7 +7,7 @@
     <style>
       html, body { margin: 0; padding: 0; font: 12pt helvetica neue, helvetica, liberation sans, sans-serif; line-height: 1; }
       h1 { font-weight: bold; font-size: 1em; margin: 0.5em; }
-      .header { background: rgba(255, 255, 255, 0.8); position: absolute; left: 0; top: 0; z-index: 1; }
+      .header { background: rgba(255, 255, 255, 0.8); position: absolute; right: 0; top: 0; z-index: 1; }
       label { margin-left: 0.5em; }
       #cy { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
     </style>
@@ -48,6 +48,11 @@
       window.addEventListener('DOMContentLoaded', function(){
         cy = window.cy = cytoscape({
           container: document.getElementById('cy'),
+          renderer: {
+            name: 'canvas',
+            showFps: true // show debugging approx. fps
+          },
+          pixelRatio: 1, // normalise pixel ratio so different screens don't alter performance
           layout: {
             name: 'preset',
           },
