@@ -52,7 +52,8 @@
             name: 'canvas',
             showFps: true // show debugging approx. fps
           },
-          pixelRatio: 1, // normalise pixel ratio so different screens don't alter performance
+          pixelRatio: 1, // default:'auto', normalise pixel ratio to 1 here so different screens don't alter performance
+          hideEdgesOnViewport: false, // default:false for cyjs, cytoscape-desktop does something like this by default
           layout: {
             name: 'preset',
           },
@@ -178,11 +179,14 @@
       <h1>Cytoscape.js performance test page</h1>
       <label>Network</label>
       <select id="network" onChange="loadSelectedGraph()">
-        <option value="./genemania-p53-200.json">200</option>
-        <option value="./genemania-default-human-600.json">600</option>
-        <option value="./1677336797128292_MOESM10_ESM_child_child.json">6,000</option>
-        <option value="./NB_selected_edges_2_10000.json">10,000</option>
-        <option value="./NB_selected_edges_2_20000.json">20,000</option>
+        <option value="./genemania-p53.json">p53 genemania (200)</option>
+        <option value="./genemania-default-human.json">genemania default (600)</option>
+        <option value="./gal-filtered.json">gal-filtered (700)</option>
+        <option value="./affinity-purification.json">affinity-purification (1,400)</option>
+        <option value="./1677336797128292_MOESM10_ESM_child_child.json">wgcna-modules-child-child (6,000)</option>
+        <option value="./tcga-colorectal-cancer.json">tcga-colorectal-cancer (6,400)</option>
+        <option value="./NB_selected_edges_2_10000.json">nb-groups (10,000)</option>
+        <option value="./NB_selected_edges_2_20000.json">nb-groups (20,000)</option>
       </select>
       <label>Layout</label>
       <select id="layout" onChange="runSelectedLayout()">
