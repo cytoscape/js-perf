@@ -1,12 +1,19 @@
-# cyjs2.6-cyjs2.7-desktop-comparison
-A rendering performance comparison of Cytoscape.js 3.2.10, and Cytoscape Desktop
+# Cytoscape.js rendering and layout performance test page
 
+This repo serves as a common testing environment for performance testing of Cytoscape.js with respect to layouts and rendering.
 
-## ~Compare Performance
+## Cytoscape.js testing
 
-To compare performance with Cytoscape Desktop, import:<br/>
- [`1677336797128292_MOESM10_ESM_child_child.json`](https://raw.githubusercontent.com/cytoscape/js-vs-desktop-perf/master/1677336797128292_MOESM10_ESM_child_child.json)(6,000 elements)<br/>
-[`NB_selected_edges_2_10000.json`](https://raw.githubusercontent.com/cytoscape/js-vs-desktop-perf/master/NB_selected_edges_2_10000.json)(10,000 elements)<br/>
-[`NB_selected_edges_2_20000.json`](https://raw.githubusercontent.com/cytoscape/js-vs-desktop-perf/master/NB_selected_edges_2_20000.json)(20,000 elements)<br/>File > Import > Network > File >fileName.json 
+To test against a local build of Cytoscape.js (i.e. an in-progress version), clone the repo and replace the `<script>` reference with a local build.
 
-To see performance of Cytoscape.3.2.10 : http://cytoscape.github.io/js-vs-desktop-perf/cyjs-3.2.10.html
+To test against the latest official release of Cytoscape.js, the page can be viewed live [on Github pages](https://cytoscape.github.io/js-perf).
+
+Stats are logged to the console.
+
+## Cytoscape desktop software
+
+This repo can be used for comparisons between Cytoscape and Cytoscape.js.  The graph data (JSON) can be loaded in an app using Cytoscape.js or in the Cytoscape desktop software.
+
+To load a graph in the Cytoscape desktop app, import one of the JSON files included in the repo.
+
+File > Import > Network > File > fileName.json 

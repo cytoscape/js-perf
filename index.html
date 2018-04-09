@@ -1,0 +1,205 @@
+<DOCTYPE html>
+<html>
+
+  <head>
+    <title>Cytoscape.js performance test page</title>
+
+    <style>
+      html, body { margin: 0; padding: 0; font: 12pt helvetica neue, helvetica, liberation sans, sans-serif; line-height: 1; }
+      h1 { font-weight: bold; font-size: 1em; margin: 0.5em; }
+      .header { background: rgba(255, 255, 255, 0.8); position: absolute; left: 0; top: 0; z-index: 1; }
+      label { margin-left: 0.5em; }
+      #cy { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+    </style>
+
+    <!-- polyfills for testing on older browsers -->
+    <script src="https://unpkg.com/bluebird@3.5.1/js/browser/bluebird.min.js"></script>
+    <script src="https://unpkg.com/whatwg-fetch@2.0.4/fetch.js"></script>
+
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+
+    <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script> <!-- needed by arbor -->
+    <script src="https://unpkg.com/cytoscape-arbor/arbor.js"></script>
+    <script src="https://unpkg.com/cytoscape-arbor/cytoscape-arbor.js"> </script>
+
+		<script src="https://unpkg.com/webcola/WebCola/cola.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-cola/cytoscape-cola.js"> </script>
+
+    <script src="https://unpkg.com/cytoscape-cose-bilkent/cytoscape-cose-bilkent.js"> </script>
+
+    <script src="https://unpkg.com/dagre/dist/dagre.js"></script>
+    <script src="https://unpkg.com/cytoscape-dagre/cytoscape-dagre.js"> </script>
+
+    <script src="https://unpkg.com/cytoscape-euler/cytoscape-euler.js"> </script>
+
+    <script src="https://unpkg.com/klayjs/klay.js"></script>
+    <script src="https://unpkg.com/cytoscape-klay/cytoscape-klay.js"> </script>
+
+		<script src="https://unpkg.com/weaverjs/dist/weaver.min.js"></script>
+    <script src="https://unpkg.com/cytoscape-spread/cytoscape-spread.js"></script>
+
+    <script src="https://unpkg.com/springy@2.8.0/springy.js"></script>
+    <script src="https://unpkg.com/cytoscape-springy/cytoscape-springy.js"></script>
+
+    <script>
+    (function(){
+      var cy;
+
+      window.addEventListener('DOMContentLoaded', function(){
+        cy = window.cy = cytoscape({
+          container: document.getElementById('cy'),
+          layout: {
+            name: 'preset',
+          },
+          elements: [],
+          style: [
+            {
+              selector: 'node',
+              style: {
+                'label': 'data(label)',
+                'background-color': '#aaa'
+              }
+            },
+            {
+              selector: 'edge',
+              style: {
+                'haystack-radius': 0.5,
+                'opacity': 0.2,
+                'line-color': '#ccc',
+                'width': 3
+              }
+            }
+          ]
+        });
+
+        loadSelectedGraph();
+      });
+
+      var now = ( typeof performance !== typeof undefined ?
+        performance.now.bind(performance) :
+        Date.now.bind(Date) );
+
+      function log(text){
+        console.log(text);
+      }
+
+      function logTime(label, duration){
+        log(' - `' + label + '`: ' + Math.round(duration) + 'ms');
+      }
+
+      function runSelectedLayout(){
+        var layoutName = document.getElementById('layout').value;
+
+        var layout = cy.layout({
+          name: layoutName
+        });
+
+        var t0, t1;
+
+        cy.one('layoutstop', () => {
+          t1 = now();
+
+          log('Stats for `' + layoutName + '`:');
+          logTime('layout', t1 - t0);
+          log('--');
+        });
+
+        t0 = now();
+
+        layout.run();
+      }
+
+      window.runSelectedLayout = runSelectedLayout;
+
+      function loadSelectedGraph(){
+        var file = document.getElementById('network').value;
+
+        document.getElementById('layout').value = 'preset';
+
+        var t0, t1, t2, t3, t4, t5, t6, t7;
+
+        t0 = now();
+
+        cy.elements().remove();
+
+        t1 = now();
+
+        return fetch( file ).then(function( response ){
+          t2 = now();
+
+          return response.json();
+        }).then(function( json ){
+          t3 = now();
+
+          var p = new Promise(function(resolve){
+            cy.one('render', function(){
+              t7 = now();
+
+              resolve();
+            });
+          });
+
+          t4 = now();
+
+          cy.add( json.elements );
+
+          t5 = now();
+
+          cy.fit();
+
+          t6 = now();
+
+          return p;
+        }).then(function(){
+          log('Stats for `' + file + '`:');
+          logTime('removing previous graph', t1 - t0);
+          logTime('fetching json', t2 - t1);
+          logTime('parsing json', t3 - t2);
+          logTime('adding elements', t5 - t4);
+          logTime('fitting to elements', t6 - t5);
+          logTime('rendering first frame', t7 - t6);
+          logTime('end-to-end', t7 - t1);
+          log('--');
+        });
+      }
+
+      window.loadSelectedGraph = loadSelectedGraph;
+    })();
+    </script>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1>Cytoscape.js performance test page</h1>
+      <label>Network</label>
+      <select id="network" onChange="loadSelectedGraph()">
+        <option value="./genemania-p53-200.json">200</option>
+        <option value="./genemania-default-human-600.json">600</option>
+        <option value="./1677336797128292_MOESM10_ESM_child_child.json">6,000</option>
+        <option value="./NB_selected_edges_2_10000.json">10,000</option>
+        <option value="./NB_selected_edges_2_20000.json">20,000</option>
+      </select>
+      <label>Layout</label>
+      <select id="layout" onChange="runSelectedLayout()">
+        <option value="preset">preset</option>
+        <option value="null">null</option>
+        <option value="random">random</option>
+        <option value="grid">grid</option>
+        <option value="circle">circle</option>
+        <option value="concentric">concentric</option>
+        <option value="breadthfirst">breadthfirst</option>
+        <option value="dagre">dagre</option>
+        <option value="klay">klay</option>
+        <option value="cose">cose</option>
+        <option value="cose-bilkent">cose-bilkent</option>
+        <option value="cola">cola</option>
+        <option value="euler">euler</option>
+        <option value="spread">spread</option>
+        <option value="springy">springy</option>
+        <option value="arbor">arbor</option>
+      </select>
+    </div>
+    <div id="cy"></div>
+  </body>
+
+</html>
